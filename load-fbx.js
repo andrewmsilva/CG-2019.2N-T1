@@ -26,8 +26,10 @@ function init(){
 
     // Load Model
     var loader = new FBXLoader();
-    loader.load( './src/models/fbx/Arcanine/Arcanine.FBX', function ( object ) {
-        var texture = new THREE.TextureLoader().load('./src/models/fbx/Arcanine/images/pm0059_00_BodyA1.png');
+    const fbx_path = './src/models/fbx/Jigglypuff/Jigglypuff.FBX';
+    const texture_path = './src/models/fbx/Jigglypuff/images_shiny/pm0039_00_Body1.png';
+    loader.load(fbx_path, function ( object ) {
+        var texture = new THREE.TextureLoader().load(texture_path);
         object.traverse( function ( child ) {
             if ( child.isMesh ) {
                 child.material = new THREE.MeshBasicMaterial( { map: texture } )
