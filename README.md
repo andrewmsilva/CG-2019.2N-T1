@@ -8,7 +8,7 @@ Nome: [Estela Maris Vilas Boas](https://github.com/estelavilasboas) e Andrew Mal
 Matrícula: 1611100054 e 1611100036
 
 ## Projeto
-O objetivo deste projeto é desenvolver uma aplicação gráfica contentdo um elemento interativo, utilizando modelos de Pokémons e a bibliotéca Three Js.
+O objetivo deste projeto é desenvolver uma aplicação gráfica contentdo um elemento interativo, utilizando modelos de Pokémons e a biblioteca Three.js.
 
 ## Interação com o teclado
 1 - Mostrar Arcanine
