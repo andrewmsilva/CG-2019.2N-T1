@@ -11,8 +11,11 @@ O objetivo deste projeto é desenvolver uma aplicação gráfica contentdo um el
 
 ## Interação com o teclado
 1 - Mostrar Arcanine
+
 2 - Mostrar Snivy
+
 3 - Mostrar Jigglypuff
+
 4 - Mostrar Magikarp
 
 ## Modelos
