@@ -8,11 +8,21 @@ let container, stats, controls;
 let camera, scene, renderer, mixer, light;
 
 let clock = new THREE.Clock();
+
+// Audios
+let listener = new THREE.AudioListener();
+let magikarpSong = new THREE.Audio(listener);
+let jigglypuffSong = new THREE.Audio(listener);
+let charmanderSong = new THREE.Audio(listener);
+let eeveeSong = new THREE.Audio(listener);
+let audioContext = new AudioContext();
+
 const KEYS = {
-  ONE:49,
-  TWO:50,
-  THREE:51,
-  FOUR:52,
+  ONE: 49,
+  TWO: 50,
+  THREE: 51,
+  FOUR: 52,
+  FIVE: 53,
 }
 
 init();
@@ -26,7 +36,9 @@ function init(){
     rotation: {x:0,y:0,z:0},
     translation: {x:100,y:0,z:-70},
     fbx_path: './src/models/fbx/Jigglypuff/Jigglypuff.FBX',
-    texture: './src/models/fbx/Jigglypuff/images/pm0039_00_Body1.png',
+    texture: './src/models/fbx/Jigglypuff/images_shiny/pm0039_00_Body1.png',
+    normalTexture: './src/models/fbx/Jigglypuff/images/pm0039_00_BodyNor.png',
+    specularTexture: './src/models/fbx/Jigglypuff/images/pm0039_00_Body2.png',
     music: './libs/audio/jigglypuff.mp3',
   }
 
@@ -36,6 +48,7 @@ function init(){
     translation: {x:300,y:5,z:-70},
     fbx_path: './src/models/fbx/Magikarp/MagikarpF.FBX',
     texture: './src/models/fbx/Magikarp/images/pm0129_00_Body1.png',
+    specularTexture: './src/models/fbx/Magikarp/images/pm0129_00_Body1Id.png',
     music: './libs/audio/magikarp.mp3',
   }
 
@@ -45,6 +58,7 @@ function init(){
     translation: {x:-100,y:0,z:-70},
     fbx_path: './src/models/fbx/Snivy/Snivy.FBX',
     texture: './src/models/fbx/Snivy/images/pm0495_00_Body1.png',
+    specularTexture: './src/models/fbx/Snivy/images/pm0495_00_Body1Id.png',
     music: './libs/audio/eevee.mp3',
   }
 
@@ -54,6 +68,7 @@ function init(){
     translation: {x:-300,y:0,z:-70},
     fbx_path: './src/models/fbx/Arcanine/Arcanine.FBX',
     texture: './src/models/fbx/Arcanine/images/pm0059_00_BodyA1.png',
+    specularTexture: './src/models/fbx/Arcanine/images/pm0059_00_BodyA1Id.png',
     music: './libs/audio/charmander.mp3',
   }
 
@@ -61,7 +76,6 @@ function init(){
   // Render localization
   container = document.createElement('div');
   document.body.appendChild( container );
-  //document.addEventListener('keydown', onDocumentKeyDown, false);
 
   // Camera ajusts
   camera = new THREE.PerspectiveCamera( 70, window.innerWidth / window.innerHeight, 1, 2000 );
@@ -74,12 +88,12 @@ function init(){
   light.position.set( 0, 200, 0 );
   scene.add( light );
   light = new THREE.DirectionalLight( 0xffffff );
-  light.position.set( 0, 200, 100 );
+  light.position.set( 0, 100, 0 );
   light.castShadow = true;
-  light.shadow.camera.top = 180;
-  light.shadow.camera.bottom = - 100;
-  light.shadow.camera.left = - 120;
-  light.shadow.camera.right = 120;
+  light.shadow.camera.top = 380;
+  light.shadow.camera.bottom = -300;
+  light.shadow.camera.left = -360;
+  light.shadow.camera.right = 360;
   scene.add( light );
 
   // Create Ground: forest green
@@ -87,19 +101,26 @@ function init(){
     new THREE.PlaneBufferGeometry( 2000, 2000 ),
     new THREE.MeshPhongMaterial({
       color: 0x228B22,
-      depthWrite: false 
+      depthWrite: false,
     })
   );
   mesh.rotation.x = - Math.PI / 2;
   mesh.receiveShadow = true;
   scene.add( mesh );
   
-  // Load Models
-  loadModel(Jigglypuff);
-  loadModel(Magikarp);
-  loadModel(Snivy);
-  loadModel(Arcanine);
+  // Load and add Models to the scene
+  loadAddModel(Jigglypuff);
+  loadAddModel(Magikarp);
+  loadAddModel(Snivy);
+  loadAddModel(Arcanine);
 
+  // Load audios
+  camera.add(listener);
+  loadAudio(Snivy, eeveeSong);
+  loadAudio(Arcanine, charmanderSong);
+  loadAudio(Jigglypuff, jigglypuffSong);
+  loadAudio(Magikarp, magikarpSong);
+/*
   // Audio
   let loader = new THREE.AudioLoader();
   loader.load('./libs/audio/magikarp.mp3',
@@ -111,7 +132,7 @@ function init(){
     },
   );        
   let ambientSound = new THREE.Audio( new THREE.AudioListener() );
-  scene.add( ambientSound );
+  scene.add( ambientSound );*/
 
   // Render Model
   renderer = new THREE.WebGLRenderer( { antialias: true } );
@@ -126,6 +147,10 @@ function init(){
   controls = new OrbitControls( camera, renderer.domElement );
   controls.target.set( 0, 100, 0 );
   controls.update();
+
+  // stats
+  stats = new Stats();
+  container.appendChild( stats.dom );
 }
 
 // Function to run all render
@@ -133,11 +158,12 @@ function animate() {
     requestAnimationFrame( animate );
     let delta = clock.getDelta();
     if ( mixer ) mixer.update( delta );
+    document.addEventListener("keydown", Commands, false);
     renderer.render( scene, camera );
-    stats.update();
+    //stats.update();
 }
 
-function loadModel(model){
+function loadAddModel(model){
   let loader = new FBXLoader();
   loader.load( model.fbx_path, function ( object ) {
       object.name = model.name;
@@ -153,10 +179,16 @@ function loadModel(model){
       object.rotateZ(model.rotation.z);
 
       // Textures
-      let texture = new THREE.TextureLoader().load(model.texture);
+      let textureLoader = new THREE.TextureLoader();
       object.traverse( function ( child ) {
         if ( child.isMesh ) {
-          child.material = new THREE.MeshBasicMaterial( { map: texture } );
+          child.material = new THREE.MeshPhongMaterial( {
+            color: 0xaaaaaa,
+            specular: 0x333333,
+            shininess: 15,
+            map: textureLoader.load(model.texture),
+            specularMap: textureLoader.load(model.specularTexture),
+          });
           child.receiveShadow = true;
           child.castShadow = true;
         }
@@ -164,6 +196,23 @@ function loadModel(model){
 
     scene.add( object );
   } );
+}
+
+function loadAudio(model, audio){
+  var audioLoader = new THREE.AudioLoader();
+  audioLoader.load( model.music, function( buffer ) {
+    audio.setBuffer( buffer );
+    audio.setVolume(1);
+  });
+  /*    audioLoader.load( './modelos/sambinha.ogg', function( buffer ) {
+        pagode.setBuffer( buffer );
+        pagode.setVolume(1);
+    });
+    //funk natalino
+    audioLoader.load( './modelos/funkNatal.ogg', function( buffer ) {
+        funkN.setBuffer( buffer );
+        funkN.setVolume(1);
+    }); */
 }
 
 /*function audioS(keyCode){
@@ -193,10 +242,42 @@ function loadModel(model){
 
 } */
 
-function onDocumentKeyDown(event){
-  let Magikarp = scene.getObjectByName("Magikarp");
-  let audio = scene.getObjectByName("music");
-  event = event || window.event;
-  let keycode = event.keycode;
+function Commands(event){
+  let keyCode = event.which;
+  console.log('keyCode', keyCode);
 
+  if(keyCode == KEYS.ONE) {
+    magikarpSong.pause();
+    eeveeSong.pause();
+    jigglypuffSong.pause();
+    charmanderSong.play();
+  } 
+
+  if(keyCode == KEYS.TWO) {
+    charmanderSong.pause();
+    magikarpSong.pause();
+    jigglypuffSong.pause();
+    eeveeSong.play();
+  }
+
+  if (keyCode == KEYS.THREE){
+    eeveeSong.pause();
+    magikarpSong.pause();
+    charmanderSong.pause();
+    jigglypuffSong.play();
+  }
+
+  if (keyCode == KEYS.FOUR){
+    jigglypuffSong.pause();
+    eeveeSong.pause();
+    charmanderSong.pause();
+    magikarpSong.play();
+  }
+
+  if (keyCode == KEYS.FIVE){
+    eeveeSong.pause();
+    magikarpSong.pause();
+    charmanderSong.pause();
+    jigglypuffSong.pause();
+  }
 }
