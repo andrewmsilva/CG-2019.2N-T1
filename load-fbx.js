@@ -249,7 +249,7 @@ function singJigglypuff(pokemons){
     let song = pokemon.name + 'Song';
     if(pokemon.show){
       eval(song).pause();
-      pokemon.rotateZ(-250);
+      pokemon.rotateZ(1.5);
     }
   })
 }
@@ -259,7 +259,7 @@ function wakeUpPokemons(pokemons){
     let song = pokemon.name + 'Song';
     if(pokemon.show){
       eval(song).play();
-      pokemon.rotateZ(250);
+      pokemon.rotateZ(-1.5);
     }
   })
 }
