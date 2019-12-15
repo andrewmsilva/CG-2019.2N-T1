@@ -11,11 +11,10 @@ let clock = new THREE.Clock();
 
 // Audios
 let listener = new THREE.AudioListener();
-let magikarpSong = new THREE.Audio(listener);
-let jigglypuffSong = new THREE.Audio(listener);
-let charmanderSong = new THREE.Audio(listener);
-let eeveeSong = new THREE.Audio(listener);
-let audioContext = new AudioContext();
+let MagikarpSong = new THREE.Audio(listener);
+let JigglypuffSong = new THREE.Audio(listener);
+let ArcanineSong = new THREE.Audio(listener);
+let SnivySong = new THREE.Audio(listener);
 
 const KEYS = {
   ONE: 49,
@@ -37,9 +36,9 @@ function init(){
     translation: {x:100,y:0,z:-70},
     fbx_path: './src/models/fbx/Jigglypuff/Jigglypuff.FBX',
     texture: './src/models/fbx/Jigglypuff/images_shiny/pm0039_00_Body1.png',
-    normalTexture: './src/models/fbx/Jigglypuff/images/pm0039_00_BodyNor.png',
     specularTexture: './src/models/fbx/Jigglypuff/images/pm0039_00_Body2.png',
-    music: './libs/audio/jigglypuff.mp3',
+    music: './libs/audio/Jigglypuff.mp3',
+    show: false,
   }
 
   let Magikarp = {
@@ -49,7 +48,8 @@ function init(){
     fbx_path: './src/models/fbx/Magikarp/MagikarpF.FBX',
     texture: './src/models/fbx/Magikarp/images/pm0129_00_Body1.png',
     specularTexture: './src/models/fbx/Magikarp/images/pm0129_00_Body1Id.png',
-    music: './libs/audio/magikarp.mp3',
+    music: './libs/audio/Magikarp.mp3',
+    show: false,
   }
 
   let Snivy = {
@@ -59,17 +59,19 @@ function init(){
     fbx_path: './src/models/fbx/Snivy/Snivy.FBX',
     texture: './src/models/fbx/Snivy/images/pm0495_00_Body1.png',
     specularTexture: './src/models/fbx/Snivy/images/pm0495_00_Body1Id.png',
-    music: './libs/audio/eevee.mp3',
+    music: './libs/audio/Snivy.mp3',
+    show: false,
   }
 
   let Arcanine = {
     name: 'Arcanine',
+    show: false,
     rotation: {x:0,y:0,z:0},
     translation: {x:-300,y:0,z:-70},
     fbx_path: './src/models/fbx/Arcanine/Arcanine.FBX',
     texture: './src/models/fbx/Arcanine/images/pm0059_00_BodyA1.png',
     specularTexture: './src/models/fbx/Arcanine/images/pm0059_00_BodyA1Id.png',
-    music: './libs/audio/charmander.mp3',
+    music: './libs/audio/Arcanine.mp3',
   }
 
 
@@ -116,23 +118,10 @@ function init(){
 
   // Load audios
   camera.add(listener);
-  loadAudio(Snivy, eeveeSong);
-  loadAudio(Arcanine, charmanderSong);
-  loadAudio(Jigglypuff, jigglypuffSong);
-  loadAudio(Magikarp, magikarpSong);
-/*
-  // Audio
-  let loader = new THREE.AudioLoader();
-  loader.load('./libs/audio/magikarp.mp3',
-    function ( audioBuffer ) {
-      ambientSound.name = 'music';
-      ambientSound.setBuffer( audioBuffer );
-      ambientSound.setVolume(0.5).setLoop(true);
-      ambientSound.play();
-    },
-  );        
-  let ambientSound = new THREE.Audio( new THREE.AudioListener() );
-  scene.add( ambientSound );*/
+  loadAudio(Snivy, SnivySong);
+  loadAudio(Arcanine, ArcanineSong);
+  loadAudio(Jigglypuff, JigglypuffSong);
+  loadAudio(Magikarp, MagikarpSong);
 
   // Render Model
   renderer = new THREE.WebGLRenderer( { antialias: true } );
@@ -147,20 +136,13 @@ function init(){
   controls = new OrbitControls( camera, renderer.domElement );
   controls.target.set( 0, 100, 0 );
   controls.update();
-
-  // stats
-  stats = new Stats();
-  container.appendChild( stats.dom );
 }
 
 // Function to run all render
 function animate() {
     requestAnimationFrame( animate );
-    let delta = clock.getDelta();
-    if ( mixer ) mixer.update( delta );
-    document.addEventListener("keydown", Commands, false);
+    document.addEventListener("keydown", keyboardCommands, false);
     renderer.render( scene, camera );
-    //stats.update();
 }
 
 function loadAddModel(model){
@@ -170,7 +152,8 @@ function loadAddModel(model){
 
       // Translations
       object.translateX(model.translation.x);
-      object.translateY(model.translation.y);
+      //object.translateY(model.translation.y);
+      object.translateY(500);
       object.translateZ(model.translation.z);
 
       // Rotations
@@ -204,80 +187,79 @@ function loadAudio(model, audio){
     audio.setBuffer( buffer );
     audio.setVolume(1);
   });
-  /*    audioLoader.load( './modelos/sambinha.ogg', function( buffer ) {
-        pagode.setBuffer( buffer );
-        pagode.setVolume(1);
-    });
-    //funk natalino
-    audioLoader.load( './modelos/funkNatal.ogg', function( buffer ) {
-        funkN.setBuffer( buffer );
-        funkN.setVolume(1);
-    }); */
 }
 
-/*function audioS(keyCode){
-    let listener = new THREE.AudioListener();
-    camera.add( listener );
+function keyboardCommands(event){
+  var Arcanine = scene.getObjectByName( "Arcanine" );
+  var Jigglypuff = scene.getObjectByName( "Jigglypuff" );
+  var Snivy = scene.getObjectByName( "Snivy" );
+  var Magikarp = scene.getObjectByName( "Magikarp" );
 
-    // create a global audio source
-    let pagode = new THREE.Audio( listener );
-
-    // load a sound and set it as the Audio object's buffer
-    camera.add( listener );
-
-    // create a global audio source
-    let audioLoader = new THREE.AudioLoader();
-    audioLoader.load( './modelos/sambinha.ogg', function( buffer ) {
-        pagode.setBuffer( buffer );
-        //sound.setLoop(true);
-        pagode.setVolume(0.5);
-        if (keyCode == 49){
-            //console.log(sound.play())
-            pagode.play();
-        }
-    });
-    if (keyCode == 98){
-        camera.remove( listener)
-    }
-
-} */
-
-function Commands(event){
   let keyCode = event.which;
-  console.log('keyCode', keyCode);
+  //console.log('keyCode', keyCode);
 
-  if(keyCode == KEYS.ONE) {
-    magikarpSong.pause();
-    eeveeSong.pause();
-    jigglypuffSong.pause();
-    charmanderSong.play();
-  } 
+  switch(keyCode){
+    case KEYS.ONE:
+      Arcanine.show = !(Arcanine.show);
+      showModel(Arcanine, ArcanineSong);
+      break;
 
-  if(keyCode == KEYS.TWO) {
-    charmanderSong.pause();
-    magikarpSong.pause();
-    jigglypuffSong.pause();
-    eeveeSong.play();
+    case KEYS.TWO:
+      Snivy.show = !(Snivy.show);
+      showModel(Snivy, SnivySong);
+      break;
+
+    case KEYS.THREE:
+      Jigglypuff.show = !(Jigglypuff.show);
+      showModel(Jigglypuff, JigglypuffSong);
+
+      if(Jigglypuff.show)
+        singJigglypuff([Arcanine, Snivy, Magikarp]);
+      else
+        wakeUpPokemons([Arcanine, Snivy, Magikarp]);
+
+      break;
+
+    case KEYS.FOUR:
+      Magikarp.show = !(Magikarp.show);
+      showModel(Magikarp, MagikarpSong);
+      break;
+
+    case KEYS.FIVE:
+      SnivySong.pause();
+      MagikarpSong.pause();
+      ArcanineSong.pause();
+      JigglypuffSong.pause();
+      break;
   }
+}
 
-  if (keyCode == KEYS.THREE){
-    eeveeSong.pause();
-    magikarpSong.pause();
-    charmanderSong.pause();
-    jigglypuffSong.play();
+function showModel(model, song){
+  if(model.show){
+    song.play();
+    model.translateY(-500);
+  } else {
+    song.pause();
+    model.translateY(500);
   }
+}
 
-  if (keyCode == KEYS.FOUR){
-    jigglypuffSong.pause();
-    eeveeSong.pause();
-    charmanderSong.pause();
-    magikarpSong.play();
-  }
+function singJigglypuff(pokemons){
+  pokemons.map( pokemon => {
+    let song = pokemon.name + 'Song';
+    if(pokemon.show){
+      eval(song).pause();
+      pokemon.rotateZ(-250);
+    }
+  })
+}
 
-  if (keyCode == KEYS.FIVE){
-    eeveeSong.pause();
-    magikarpSong.pause();
-    charmanderSong.pause();
-    jigglypuffSong.pause();
-  }
+function wakeUpPokemons(pokemons){
+  pokemons.map( pokemon => {
+    let song = pokemon.name + 'Song';
+    if(pokemon.show){
+      eval(song).play();
+      pokemon.rotateZ(250);
+    }
+  })
 }
