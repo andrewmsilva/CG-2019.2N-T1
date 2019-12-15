@@ -2,7 +2,8 @@
 
 ## Trabalho Final 
 
-Nome: Estela Maris Vilas Boas e Andrew Malta Silva
+Nome: [Estela Maris Vilas Boas](https://github.com/estelavilasboas) e Andrew Malta Silva
+
 
 Matrícula: 1611100054 e 1611100036
 
@@ -17,6 +18,8 @@ O objetivo deste projeto é desenvolver uma aplicação gráfica contentdo um el
 3 - Mostrar Jigglypuff
 
 4 - Mostrar Magikarp
+
+5 - Parar todas as músicas 
 
 ## Modelos
 [\[ 1 \] - Pokémon XY FBX](https://www.models-resource.com/3ds/pokemonxy/)
