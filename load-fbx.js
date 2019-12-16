@@ -6,6 +6,7 @@ import { FBXLoader } from './libs/js/three.js/examples/jsm/loaders/FBXLoader.js'
 
 let container, stats, controls;
 let camera, scene, renderer, mixer, light;
+let activeInsaneMode = false;
 
 let clock = new THREE.Clock();
 
@@ -22,13 +23,13 @@ const KEYS = {
   THREE: 51,
   FOUR: 52,
   FIVE: 53,
+  SIX: 54,
 }
 
 init();
 animate();
 
 function init(){
-
   // Models structures
   let Jigglypuff = {
     name: 'Jigglypuff',
@@ -114,37 +115,7 @@ function init(){
   loadAddModel(Magikarp);
   loadAddModel(Snivy);
   loadAddModel(Arcanine);
-/*
-  //boneco
-  var pula = new FBXLoader();
-  pula.load( './src/models/fbx/Dancer/Hip-Hop-Dancing.fbx', function ( object ) {
-      mixer = new THREE.AnimationMixer( object );
-      var action = mixer.clipAction( object.animations[ 0 ] );
-      action.play();
-      object.traverse( function ( child ) {
-          if ( child.isMesh ) {
-              child.castShadow = true;
-              child.receiveShadow = true;
-          }
-      }
-      );
-      scene.add( object );
-  } );
 
-  pula.load( './src/models/fbx/Dancer/Capoeira.fbx', function ( object ) {
-    mixer = new THREE.AnimationMixer( object );
-    var action = mixer.clipAction( object.animations[ 0 ] );
-    action.play();
-    object.traverse( function ( child ) {
-        if ( child.isMesh ) {
-            child.castShadow = true;
-            child.receiveShadow = true;
-        }
-    });
-    object.translateZ(-200);
-    scene.add( object );
-} );
-*/
   // Load audios
   camera.add(listener);
   loadAudio(Snivy, SnivySong);
@@ -169,11 +140,21 @@ function init(){
 
 // Function to run all render
 function animate() {
-    requestAnimationFrame( animate );
-    var delta = clock.getDelta();
-    if ( mixer ) mixer.update( delta );
-    document.addEventListener("keydown", keyboardCommands, false);
-    renderer.render( scene, camera );
+  if(activeInsaneMode){
+    var Arcanine = scene.getObjectByName( "Arcanine" );
+    var Jigglypuff = scene.getObjectByName( "Jigglypuff" );
+    var Snivy = scene.getObjectByName( "Snivy" );
+    var Magikarp = scene.getObjectByName( "Magikarp" );
+
+    rotatePokemons([Jigglypuff, Arcanine, Snivy, Magikarp])
+  }
+  requestAnimationFrame( animate );
+
+  var delta = clock.getDelta();
+  if ( mixer ) mixer.update( delta );
+
+  document.addEventListener("keydown", keyboardCommands, false);
+  renderer.render( scene, camera );
 }
 
 function loadAddModel(model){
@@ -230,34 +211,35 @@ function keyboardCommands(event){
 
   switch(keyCode){
     case KEYS.ONE:
-      if(!Jigglypuff.show){
+      if(!Jigglypuff.show && !activeInsaneMode){
         Arcanine.show = !(Arcanine.show);
-        showModel(Arcanine, ArcanineSong);
+        showModel(Arcanine);
       }
       break;
 
     case KEYS.TWO:
-      if(!Jigglypuff.show){
+      if(!Jigglypuff.show && !activeInsaneMode){
         Snivy.show = !(Snivy.show);
-        showModel(Snivy, SnivySong);
+        showModel(Snivy);
       }
       break;
 
     case KEYS.THREE:
-      Jigglypuff.show = !(Jigglypuff.show);
-      showModel(Jigglypuff, JigglypuffSong);
+      if(!activeInsaneMode){
+        Jigglypuff.show = !(Jigglypuff.show);
+        showModel(Jigglypuff);
 
-      if(Jigglypuff.show)
-        singJigglypuff([Arcanine, Snivy, Magikarp]);
-      else
-        wakeUpPokemons([Arcanine, Snivy, Magikarp]);
-
+        if(Jigglypuff.show)
+          singJigglypuff([Arcanine, Snivy, Magikarp]);
+        else
+          wakeUpPokemons([Arcanine, Snivy, Magikarp]);
+      }
       break;
 
     case KEYS.FOUR:
-      if(!Jigglypuff.show){
+      if(!Jigglypuff.show && !activeInsaneMode){
         Magikarp.show = !(Magikarp.show);
-        showModel(Magikarp, MagikarpSong);
+        showModel(Magikarp);
       }
       break;
 
@@ -267,15 +249,21 @@ function keyboardCommands(event){
       ArcanineSong.pause();
       JigglypuffSong.pause();
       break;
+
+    case KEYS.SIX:
+      activeInsaneMode = true;
+      insaneMode();
+      break;
   }
 }
 
-function showModel(model, song){
+function showModel(model){
+  let song = model.name + 'Song';
   if(model.show){
-    song.play();
+    if(!activeInsaneMode) eval(song).play();
     model.translateY(-900);
   } else {
-    song.pause();
+    eval(song).pause();
     model.translateY(900);
   }
 }
@@ -294,8 +282,75 @@ function wakeUpPokemons(pokemons){
   pokemons.map( pokemon => {
     let song = pokemon.name + 'Song';
     if(pokemon.show){
-      eval(song).play();
+      if(!activeInsaneMode)
+        eval(song).play();
       pokemon.rotateZ(-1.5);
     }
+  })
+}
+
+function insaneMode(){
+  //if(activeInsaneMode){
+    let dancerLoader = new FBXLoader();
+    dancerLoader.load( './src/models/fbx/Dancer/Hip-Hop-Dancing.fbx', function ( object ) {
+        mixer = new THREE.AnimationMixer( object );
+        var action = mixer.clipAction( object.animations[ 0 ] );
+        action.play();
+        object.traverse( function ( child ) {
+            if ( child.isMesh ) {
+                child.castShadow = true;
+                child.receiveShadow = true;
+            }
+        }
+        );
+        object.name = "HipHop";
+        scene.add( object );
+    } );
+
+    dancerLoader.load( './src/models/fbx/Dancer/Capoeira.fbx', function ( object ) {
+      mixer = new THREE.AnimationMixer( object );
+      var action = mixer.clipAction( object.animations[ 0 ] );
+      action.play();
+      object.traverse( function ( child ) {
+          if ( child.isMesh ) {
+              child.castShadow = true;
+              child.receiveShadow = true;
+          }
+      });
+      object.translateZ(-200);
+      object.name = "Capoeira"
+      scene.add( object );
+    });
+
+    dancerLoader.load( './src/models/fbx/Dancer/Samba Dancing.fbx', function ( object ) {
+      mixer = new THREE.AnimationMixer( object );
+      var action = mixer.clipAction( object.animations[ 0 ] );
+      action.play();
+      object.traverse( function ( child ) {
+          if ( child.isMesh ) {
+              child.castShadow = true;
+              child.receiveShadow = true;
+          }
+      });
+      object.translateZ(-200);
+      object.translateX(100);
+      object.name = "Samba"
+      scene.add( object );
+    });
+
+  /*} else {
+    scene.remove(scene.getObjectByName("Samba"));
+    scene.remove(scene.getObjectByName("HipHop"));
+    scene.remove(scene.getObjectByName("Capoeira"));
+  }*/
+}
+
+function rotatePokemons(pokemons){
+  pokemons.map( pokemon => {
+    if(!pokemon.show) {
+      pokemon.show = true;
+      showModel(pokemon);
+    }
+    pokemon.rotation.y += 0.1;
   })
 }
