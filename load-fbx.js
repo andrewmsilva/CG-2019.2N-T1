@@ -16,6 +16,7 @@ let MagikarpSong = new THREE.Audio(listener);
 let JigglypuffSong = new THREE.Audio(listener);
 let ArcanineSong = new THREE.Audio(listener);
 let SnivySong = new THREE.Audio(listener);
+let breakFree = new THREE.Audio(listener);
 
 const KEYS = {
   ONE: 49,
@@ -100,7 +101,7 @@ function init(){
 
   // Create Ground: forest green
   let mesh = new THREE.Mesh( 
-    new THREE.PlaneBufferGeometry( 2000, 2000 ),
+    new THREE.PlaneBufferGeometry( 5000, 2000 ),
     new THREE.MeshPhongMaterial({
       color: 0x228B22,
       depthWrite: false,
@@ -122,6 +123,13 @@ function init(){
   loadAudio(Arcanine, ArcanineSong);
   loadAudio(Jigglypuff, JigglypuffSong);
   loadAudio(Magikarp, MagikarpSong);
+
+  // Music
+  let audioLoader = new THREE.AudioLoader();
+  audioLoader.load('./libs/audio/BreakFree.mp3', function( buffer ) {
+    breakFree.setBuffer( buffer );
+    breakFree.setVolume(1);
+  });
 
   // Render Model
   renderer = new THREE.WebGLRenderer( { antialias: true } );
@@ -193,7 +201,7 @@ function loadAddModel(model){
 }
 
 function loadAudio(model, audio){
-  var audioLoader = new THREE.AudioLoader();
+  let audioLoader = new THREE.AudioLoader();
   audioLoader.load( model.music, function( buffer ) {
     audio.setBuffer( buffer );
     audio.setVolume(1);
@@ -205,9 +213,7 @@ function keyboardCommands(event){
   var Jigglypuff = scene.getObjectByName( "Jigglypuff" );
   var Snivy = scene.getObjectByName( "Snivy" );
   var Magikarp = scene.getObjectByName( "Magikarp" );
-
   let keyCode = event.which;
-  //console.log('keyCode', keyCode);
 
   switch(keyCode){
     case KEYS.ONE:
@@ -251,8 +257,16 @@ function keyboardCommands(event){
       break;
 
     case KEYS.SIX:
-      activeInsaneMode = true;
-      insaneMode();
+      if(!activeInsaneMode){
+        SnivySong.pause();
+        MagikarpSong.pause();
+        ArcanineSong.pause();
+        JigglypuffSong.pause();
+        breakFree.play();
+
+        activeInsaneMode = true;
+        insaneMode();
+      }
       break;
   }
 }
@@ -291,6 +305,8 @@ function wakeUpPokemons(pokemons){
 
 function insaneMode(){
   //if(activeInsaneMode){
+
+    // Dancers
     let dancerLoader = new FBXLoader();
     dancerLoader.load( './src/models/fbx/Dancer/Hip-Hop-Dancing.fbx', function ( object ) {
         mixer = new THREE.AnimationMixer( object );
@@ -337,6 +353,37 @@ function insaneMode(){
       object.name = "Samba"
       scene.add( object );
     });
+
+    // Runner
+    let runnerLoader = new FBXLoader();
+    runnerLoader.load( './src/models/fbx/Dancer/Running.fbx', function ( object ) {
+        mixer = new THREE.AnimationMixer( object );
+        var action = mixer.clipAction( object.animations[ 0 ] );
+        action.play();
+        object.traverse( function ( child ) {
+            if ( child.isMesh ) {
+                child.castShadow = true;
+                child.receiveShadow = true;
+            }
+        }
+        );
+        object.translateX(200);
+        object.translateZ(-1200);
+        object.name = "Running";
+        object.rotateY(0.5);
+        scene.add( object );
+    });
+
+    // Sphere
+    var geometry = new THREE.SphereGeometry( 150, 32, 32 );
+    var material = new THREE.MeshBasicMaterial( {color: 0x00aaff} );
+    var sphere = new THREE.Mesh( geometry, material );
+
+    sphere.translateX(100);
+    sphere.translateY(150);
+    sphere.translateZ(-800);
+
+    scene.add( sphere );
 
   /*} else {
     scene.remove(scene.getObjectByName("Samba"));
