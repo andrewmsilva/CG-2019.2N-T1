@@ -74,7 +74,6 @@ function init(){
     music: './libs/audio/Arcanine.mp3',
   }
 
-
   // Render localization
   container = document.createElement('div');
   document.body.appendChild( container );
@@ -115,7 +114,37 @@ function init(){
   loadAddModel(Magikarp);
   loadAddModel(Snivy);
   loadAddModel(Arcanine);
+/*
+  //boneco
+  var pula = new FBXLoader();
+  pula.load( './src/models/fbx/Dancer/Hip-Hop-Dancing.fbx', function ( object ) {
+      mixer = new THREE.AnimationMixer( object );
+      var action = mixer.clipAction( object.animations[ 0 ] );
+      action.play();
+      object.traverse( function ( child ) {
+          if ( child.isMesh ) {
+              child.castShadow = true;
+              child.receiveShadow = true;
+          }
+      }
+      );
+      scene.add( object );
+  } );
 
+  pula.load( './src/models/fbx/Dancer/Capoeira.fbx', function ( object ) {
+    mixer = new THREE.AnimationMixer( object );
+    var action = mixer.clipAction( object.animations[ 0 ] );
+    action.play();
+    object.traverse( function ( child ) {
+        if ( child.isMesh ) {
+            child.castShadow = true;
+            child.receiveShadow = true;
+        }
+    });
+    object.translateZ(-200);
+    scene.add( object );
+} );
+*/
   // Load audios
   camera.add(listener);
   loadAudio(Snivy, SnivySong);
@@ -141,6 +170,8 @@ function init(){
 // Function to run all render
 function animate() {
     requestAnimationFrame( animate );
+    var delta = clock.getDelta();
+    if ( mixer ) mixer.update( delta );
     document.addEventListener("keydown", keyboardCommands, false);
     renderer.render( scene, camera );
 }
@@ -152,8 +183,7 @@ function loadAddModel(model){
 
       // Translations
       object.translateX(model.translation.x);
-      //object.translateY(model.translation.y);
-      object.translateY(500);
+      object.translateY(model.translation.y+900);
       object.translateZ(model.translation.z);
 
       // Rotations
@@ -200,13 +230,17 @@ function keyboardCommands(event){
 
   switch(keyCode){
     case KEYS.ONE:
-      Arcanine.show = !(Arcanine.show);
-      showModel(Arcanine, ArcanineSong);
+      if(!Jigglypuff.show){
+        Arcanine.show = !(Arcanine.show);
+        showModel(Arcanine, ArcanineSong);
+      }
       break;
 
     case KEYS.TWO:
-      Snivy.show = !(Snivy.show);
-      showModel(Snivy, SnivySong);
+      if(!Jigglypuff.show){
+        Snivy.show = !(Snivy.show);
+        showModel(Snivy, SnivySong);
+      }
       break;
 
     case KEYS.THREE:
@@ -221,8 +255,10 @@ function keyboardCommands(event){
       break;
 
     case KEYS.FOUR:
-      Magikarp.show = !(Magikarp.show);
-      showModel(Magikarp, MagikarpSong);
+      if(!Jigglypuff.show){
+        Magikarp.show = !(Magikarp.show);
+        showModel(Magikarp, MagikarpSong);
+      }
       break;
 
     case KEYS.FIVE:
@@ -237,10 +273,10 @@ function keyboardCommands(event){
 function showModel(model, song){
   if(model.show){
     song.play();
-    model.translateY(-500);
+    model.translateY(-900);
   } else {
     song.pause();
-    model.translateY(500);
+    model.translateY(900);
   }
 }
 
