@@ -21,6 +21,8 @@ Este trabalho possui como objetivo o desenvolvimento de uma aplicação gráfica
 
 5 - Parar todas as músicas 
 
+6 - Modo (pouquíssimo) Insano
+
 ## Modelos
 [\[ 1 \] - Pokémon XY FBX](https://www.models-resource.com/3ds/pokemonxy/)
 
